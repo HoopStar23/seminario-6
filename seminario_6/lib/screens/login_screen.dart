@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:seminario_6/widgets/auth_background.dart';
 import 'package:seminario_6/widgets/cardContainer.dart';
+import 'package:seminario_6/widgets/login_form.dart';
 
 class LoginScreen extends StatelessWidget {
   static const String routeName = 'login';
@@ -19,7 +20,7 @@ class LoginScreen extends StatelessWidget {
                   SizedBox(height: 10),
                   Text('Login', style: Theme.of(context).textTheme.headlineMedium),
                   SizedBox(height: 30),
-                  Text('formulario')
+                  LoginForm()
                 ],
               ),
             )
