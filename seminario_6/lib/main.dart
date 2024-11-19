@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:seminario_6/screens/home_screen.dart';
 import 'package:seminario_6/screens/login_screen.dart';
+import 'package:seminario_6/screens/register_screen.dart';
 
 void main() => runApp(const MyApp());
 
@@ -17,7 +18,8 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: LoginScreen.routeName,
       routes: {HomeScreen.routeName: (BuildContext context) => HomeScreen(),
-      LoginScreen.routeName: (BuildContext context) => LoginScreen()}
+      LoginScreen.routeName: (BuildContext context) => LoginScreen(),
+      RegisterScreen.routeName: (BuildContext context) => RegisterScreen()}
     );
   }
 }
