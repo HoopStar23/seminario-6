@@ -20,9 +20,41 @@ class ProductScreen extends StatelessWidget {
   }
 }
 
-class _ProductScreenBody extends StatelessWidget {
+class _ProductScreenBody extends StatefulWidget {
   const _ProductScreenBody({super.key, required this.productService});
   final ProductService productService;
+
+  @override
+  State<_ProductScreenBody> createState() => _ProductScreenBodyState();
+}
+
+class _ProductScreenBodyState extends State<_ProductScreenBody> {
+  DateTime? selectedDate;
+  final TextEditingController dateController = TextEditingController();
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: selectedDate ?? DateTime.now(), // Fecha inicial
+      firstDate: DateTime(2000), // Primera fecha permitida
+      lastDate: DateTime(2100), // Última fecha permitida
+    );
+
+    if (pickedDate != null && pickedDate != selectedDate) {
+      setState(() {
+        selectedDate = pickedDate;
+        // Actualizar el controlador con la fecha seleccionada
+        dateController.text =
+            "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+      });
+    }
+
+    @override
+    void dispose() {
+      dateController.dispose(); // Liberar recursos del controlador
+      super.dispose();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,28 +82,50 @@ class _ProductScreenBody extends StatelessWidget {
                     onPressed: () async {
                       if (productForm.isValidForm()) return;
                       final String? imageUrl =
-                          await productService.uploadImage();
+                          await widget.productService.uploadImage();
                       if (imageUrl != null)
                         productForm.product.picture = imageUrl;
                       print(imageUrl);
-                      await _processImage(productService);
+                      await _processImage(widget.productService);
                     },
                     icon: Icon(
                       Icons.camera_alt_outlined,
                       size: 40,
                       color: Colors.white,
                     ))),
+            Positioned(
+                top: 160,
+                right: 20,
+                child: IconButton(
+                    onPressed: () async {
+                      if (productForm.isValidForm()) return;
+                      final String? imageUrl =
+                          await widget.productService.uploadImage();
+                      if (imageUrl != null)
+                        productForm.product.picture = imageUrl;
+                      print(imageUrl);
+                      await _lookImage(widget.productService);
+                    },
+                    icon: Icon(
+                      Icons.add_photo_alternate_outlined,
+                      size: 40,
+                      color: Colors.white,
+                    ))),
           ]),
-          _productForm(productFormProvider: productForm),
+          _productForm(
+              productFormProvider: productForm,
+              dateController: dateController,
+              onDateSelect: () => _selectDate(context)),
         ])),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
             if (productForm.isValidForm()) return;
 
-            await productService.saveOrCreateProduct(productForm.product);
+            await widget.productService
+                .saveOrCreateProduct(productForm.product);
           },
-          child: productService.isSaving
+          child: widget.productService.isSaving
               ? const CircularProgressIndicator(color: Colors.white)
               : Icon(Icons.save_outlined),
         ));
@@ -90,13 +144,32 @@ Future<void> _processImage(ProductService productService) async {
     productService.updateSelectedProductImage(pickedFile.path);
     productService.uploadImage();
   }
+}
 
+Future<void> _lookImage(ProductService productService) async {
+  final _picker = ImagePicker();
+  final XFile? pickedFile =
+      await _picker.pickImage(source: ImageSource.gallery, imageQuality: 100);
+
+  if (pickedFile == null) {
+    print('No seleccionó nada');
+  } else {
+    print('Tenemos imagen ${pickedFile.path}');
+    productService.updateSelectedProductImage(pickedFile.path);
+    productService.uploadImage();
+  }
 }
 
 class _productForm extends StatelessWidget {
   final ProductFormProvider productFormProvider;
+  final TextEditingController dateController;
+  final VoidCallback onDateSelect;
 
-  const _productForm({super.key, required this.productFormProvider});
+  const _productForm(
+      {super.key,
+      required this.productFormProvider,
+      required this.dateController,
+      required this.onDateSelect});
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -136,6 +209,15 @@ class _productForm extends StatelessWidget {
                       },
                       keyboardType: TextInputType.number,
                       decoration: authInputDecoration('150€', 'Precio')),
+                  SizedBox(height: 30),
+                  TextFormField(
+                    onChanged: (value) {
+                      productFormProvider.product.date = value;
+                                        },
+                    controller: dateController,
+                    decoration: authInputDecoration('Fecha Registro',''),
+                    onTap: onDateSelect,
+                  ),
                   SizedBox(height: 30),
                   SwitchListTile.adaptive(
                       value: productFormProvider.product.available,

@@ -6,13 +6,15 @@ class Product {
     String? picture;
     double price;
     String? id;
+    String? date;
 
     Product({
         required this.available,
         required this.name,
         this.picture,
         required this.price,
-        this.id
+        this.id,
+        this.date,
     });
 
     factory Product.fromJson(String str) => Product.fromMap(json.decode(str));
@@ -25,6 +27,7 @@ class Product {
         picture: json["picture"],
         price: json["price"]?.toDouble(),
         id: json["id"],
+        date: json["date"],
     );
 
     Product copy() => Product(
@@ -32,13 +35,16 @@ class Product {
       name: this.name,
       price: this.price,
       picture: this.picture,
-      id: this.id);
+      id: this.id,
+      date: this.date,);
+      
 
     Map<String, dynamic> toMap() => {
         "available": available,
         "name": name,
         "picture": picture,
         "price": price,
-        "id": id
+        "id": id,
+        "date":date
     };
 }
