@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:seminario_6/providers/product_form_provider.dart';
 import 'package:seminario_6/service/product_service.dart';
@@ -14,47 +15,17 @@ class ProductScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final productService = Provider.of<ProductService>(context);
+
     return ChangeNotifierProvider(
         create: (_) => ProductFormProvider(productService.selectedProduct),
         child: _ProductScreenBody(productService: productService));
   }
 }
 
-class _ProductScreenBody extends StatefulWidget {
-  const _ProductScreenBody({super.key, required this.productService});
+class _ProductScreenBody extends StatelessWidget {
   final ProductService productService;
 
-  @override
-  State<_ProductScreenBody> createState() => _ProductScreenBodyState();
-}
-
-class _ProductScreenBodyState extends State<_ProductScreenBody> {
-  DateTime? selectedDate;
-  final TextEditingController dateController = TextEditingController();
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: selectedDate ?? DateTime.now(), // Fecha inicial
-      firstDate: DateTime(2000), // Primera fecha permitida
-      lastDate: DateTime(2100), // Última fecha permitida
-    );
-
-    if (pickedDate != null && pickedDate != selectedDate) {
-      setState(() {
-        selectedDate = pickedDate;
-        // Actualizar el controlador con la fecha seleccionada
-        dateController.text =
-            "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
-      });
-    }
-
-    @override
-    void dispose() {
-      dateController.dispose(); // Liberar recursos del controlador
-      super.dispose();
-    }
-  }
+  const _ProductScreenBody({super.key, required this.productService});
 
   @override
   Widget build(BuildContext context) {
@@ -82,11 +53,11 @@ class _ProductScreenBodyState extends State<_ProductScreenBody> {
                     onPressed: () async {
                       if (productForm.isValidForm()) return;
                       final String? imageUrl =
-                          await widget.productService.uploadImage();
+                          await productService.uploadImage();
                       if (imageUrl != null)
                         productForm.product.picture = imageUrl;
                       print(imageUrl);
-                      await _processImage(widget.productService);
+                      await _processImage(productService);
                     },
                     icon: Icon(
                       Icons.camera_alt_outlined,
@@ -100,11 +71,11 @@ class _ProductScreenBodyState extends State<_ProductScreenBody> {
                     onPressed: () async {
                       if (productForm.isValidForm()) return;
                       final String? imageUrl =
-                          await widget.productService.uploadImage();
+                          await productService.uploadImage();
                       if (imageUrl != null)
                         productForm.product.picture = imageUrl;
                       print(imageUrl);
-                      await _lookImage(widget.productService);
+                      await _lookImage(productService);
                     },
                     icon: Icon(
                       Icons.add_photo_alternate_outlined,
@@ -112,20 +83,16 @@ class _ProductScreenBodyState extends State<_ProductScreenBody> {
                       color: Colors.white,
                     ))),
           ]),
-          _productForm(
-              productFormProvider: productForm,
-              dateController: dateController,
-              onDateSelect: () => _selectDate(context)),
+          _productForm(productFormProvider: productForm),
         ])),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
             if (productForm.isValidForm()) return;
 
-            await widget.productService
-                .saveOrCreateProduct(productForm.product);
+            await productService.saveOrCreateProduct(productForm.product);
           },
-          child: widget.productService.isSaving
+          child: productService.isSaving
               ? const CircularProgressIndicator(color: Colors.white)
               : Icon(Icons.save_outlined),
         ));
@@ -160,16 +127,40 @@ Future<void> _lookImage(ProductService productService) async {
   }
 }
 
-class _productForm extends StatelessWidget {
+class _productForm extends StatefulWidget {
   final ProductFormProvider productFormProvider;
-  final TextEditingController dateController;
-  final VoidCallback onDateSelect;
 
-  const _productForm(
-      {super.key,
-      required this.productFormProvider,
-      required this.dateController,
-      required this.onDateSelect});
+  const _productForm({super.key, required this.productFormProvider});
+
+  @override
+  State<_productForm> createState() => _productFormState();
+}
+
+class _productFormState extends State<_productForm> {
+  DateTime? _selectedDate;
+  final DateFormat dateFormatter = DateFormat('dd/MM/yyyy');
+
+  final TextEditingController _dateController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    _dateController.text = widget.productFormProvider.product.date!;
+    if (_dateController.text.isNotEmpty) {
+      try {
+        _selectedDate = dateFormatter.parse(_dateController.text);
+      } catch (e) {
+        print("Formato de fecha no válido: ${_dateController.text}");
+        _selectedDate = null;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _dateController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -183,9 +174,9 @@ class _productForm extends StatelessWidget {
                 children: [
                   SizedBox(height: 10),
                   TextFormField(
-                      initialValue: productFormProvider.product.name,
+                      initialValue: widget.productFormProvider.product.name,
                       onChanged: (value) =>
-                          productFormProvider.product.name = value,
+                          widget.productFormProvider.product.name = value,
                       validator: (value) {
                         if (value == null || value.length < 1)
                           return 'El nombre es obligatorio';
@@ -198,12 +189,13 @@ class _productForm extends StatelessWidget {
                         FilteringTextInputFormatter.allow(
                             RegExp(r'^(\d+)?\.?\d{0,2}'))
                       ],
-                      initialValue: '${productFormProvider.product.price}',
+                      initialValue:
+                          '${widget.productFormProvider.product.price}',
                       onChanged: (value) {
                         if (double.tryParse(value) == null) {
-                          productFormProvider.product.price = 0;
+                          widget.productFormProvider.product.price = 0;
                         } else {
-                          productFormProvider.product.price =
+                          widget.productFormProvider.product.price =
                               double.parse(value);
                         }
                       },
@@ -211,24 +203,48 @@ class _productForm extends StatelessWidget {
                       decoration: authInputDecoration('150€', 'Precio')),
                   SizedBox(height: 30),
                   TextFormField(
-                    onChanged: (value) {
-                      productFormProvider.product.date = value;
-                                        },
-                    controller: dateController,
-                    decoration: authInputDecoration('Fecha Registro',''),
-                    onTap: onDateSelect,
+                    controller: _dateController,
+                    readOnly: true,
+                    validator: (value) {
+                      if (_dateController.text == '') {
+                        return "Introduce una fecha de registro";
+                      }
+                      return null;
+                    },
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    autocorrect: false,
+                    keyboardType: TextInputType.datetime,
+                    decoration: authInputDecoration('', "Seleccione una fecha"),
+                    onTap: () => _selectDate(context),
                   ),
                   SizedBox(height: 30),
                   SwitchListTile.adaptive(
-                      value: productFormProvider.product.available,
+                      value: widget.productFormProvider.product.available,
                       title: Text('Disponible'),
                       activeColor: Colors.indigo,
                       onChanged: (value) {
-                        productFormProvider.updateAvailability(value);
+                        widget.productFormProvider.updateAvailability(value);
                       })
                 ],
               )),
         ));
+  }
+
+    Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+        // Actualiza el controlador con la fecha formateada
+        _dateController.text = "${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}";
+        widget.productFormProvider.product.date = _dateController.text;
+      });
+    }
   }
 
   BoxDecoration _decoration() => BoxDecoration(
