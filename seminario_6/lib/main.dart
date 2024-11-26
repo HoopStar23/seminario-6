@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:seminario_6/providers/product_form_provider.dart';
 import 'package:seminario_6/screens/home_screen.dart';
 import 'package:seminario_6/screens/login_screen.dart';
 import 'package:seminario_6/screens/product_screen.dart';

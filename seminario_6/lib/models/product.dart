@@ -27,6 +27,13 @@ class Product {
         id: json["id"],
     );
 
+    Product copy() => Product(
+      available: this.available,
+      name: this.name,
+      price: this.price,
+      picture: this.picture,
+      id: this.id);
+
     Map<String, dynamic> toMap() => {
         "available": available,
         "name": name,
