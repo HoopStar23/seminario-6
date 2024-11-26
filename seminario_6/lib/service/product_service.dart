@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:seminario_6/models/product.dart';
@@ -11,6 +12,7 @@ class ProductService extends ChangeNotifier {
   bool isLoading = false;
   bool isSaving = false;
   late Product selectedProduct;
+  File? newPictureFile;
 
   ProductService() {
     this.loadProducts();
@@ -44,8 +46,23 @@ class ProductService extends ChangeNotifier {
 
     print(decodedData);
 
-    final indexToUpdate = products.indexWhere((productSearched) => productSearched.id == product.id);
+    final indexToUpdate = products
+        .indexWhere((productSearched) => productSearched.id == product.id);
     products[indexToUpdate] = product;
+    return product.id!;
+  }
+
+  Future<String> createProduct(Product product) async {
+    final url = Uri.https(_baseUrl, 'products.json');
+    final resp = await http.post(url, body: product.toJson());
+    final decodedData = json.decode(resp.body);
+
+    product.id = decodedData['name'];
+
+    this.products.add(product);
+
+    print(decodedData);
+
     return product.id!;
   }
 
@@ -54,11 +71,46 @@ class ProductService extends ChangeNotifier {
     notifyListeners();
 
     if (product.id == null) {
+      await createProduct(product);
     } else {
-      await this.updateProduct(product);
+      await updateProduct(product);
     }
 
     isSaving = false;
     notifyListeners();
+  }
+
+  void updateSelectedProductImage(String path) {
+    selectedProduct.picture = path;
+    newPictureFile = File.fromUri(Uri(path: path));
+    notifyListeners();
+  }
+
+  Future<String?> uploadImage() async{
+    if(newPictureFile == null) return null;
+
+    isSaving = true;
+    notifyListeners();
+
+    final url = Uri.parse('https://api.cloudinary.com/v1_1/daq5cmr97/image/upload?upload_preset=vpzhdwdp');
+
+    final imageUploadRequest = http.MultipartRequest('POST', url);
+
+    final file = await http.MultipartFile.fromPath('file', newPictureFile!.path);
+
+    imageUploadRequest.files.add(file);
+
+    final streamResponse = await imageUploadRequest.send();
+    final resp = await http.Response.fromStream(streamResponse);
+
+    if(resp.statusCode != 200 && resp.statusCode != 201){
+      print('Ha habido un error');
+      print(resp.body);
+      return null;
+    }
+
+    newPictureFile = null;
+    final decodedData = json.decode(resp.body);
+    return decodedData['secure_url'];
   }
 }

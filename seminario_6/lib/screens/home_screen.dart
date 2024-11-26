@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:seminario_6/models/product.dart';
 import 'package:seminario_6/screens/product_screen.dart';
 import 'package:seminario_6/screens/screens.dart';
 import 'package:seminario_6/service/product_service.dart';
@@ -33,7 +34,13 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton:
-          FloatingActionButton(child: Icon(Icons.add), onPressed: () {}),
+          FloatingActionButton(child: Icon(Icons.add), onPressed: () {
+            productService.selectedProduct = new Product(
+              available: false,
+              name: '',
+              price: 0);
+              Navigator.pushNamed(context, 'product');
+          }),
     );
   }
 }

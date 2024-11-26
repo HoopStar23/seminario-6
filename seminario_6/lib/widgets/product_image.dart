@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:seminario_6/providers/product_form_provider.dart';
+import 'package:seminario_6/widgets/getImage.dart';
 
 class ProductImage extends StatelessWidget {
   final String? url;
@@ -17,12 +20,7 @@ class ProductImage extends StatelessWidget {
             borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(45),
                 topRight: Radius.circular(45)),
-                child: url == null
-            ? Image(image: AssetImage('assets/no-image.png'), fit: BoxFit.cover)
-            : FadeInImage(
-                placeholder: AssetImage('assets/jar-loading.gif'),
-                image: NetworkImage(url!),
-                fit: BoxFit.cover),
+                child: getImage(url)
           ),
         ),
         width: double.infinity,

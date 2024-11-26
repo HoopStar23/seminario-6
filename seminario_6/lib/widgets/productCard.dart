@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:seminario_6/models/product.dart';
+import 'package:seminario_6/widgets/getImage.dart';
 
 class Productcard extends StatelessWidget {
   final Product product;
@@ -99,7 +100,7 @@ class _ProductDetails extends StatelessWidget {
       child: Container(
         decoration: _buildBoxDexoration(),
         child: Padding(
-          padding: EdgeInsets.only(right: 160),
+          padding: EdgeInsets.only(right: 100),
           child: Column(
             children: [
               Text(titulo,
@@ -141,12 +142,7 @@ class _BackgroundImage extends StatelessWidget {
       height: 400,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(25),
-        child: url == null
-            ? Image(image: AssetImage('assets/no-image.png'), fit: BoxFit.cover)
-            : FadeInImage(
-                placeholder: AssetImage('assets/jar-loading.gif'),
-                image: NetworkImage(url!),
-                fit: BoxFit.cover),
+        child: getImage(url),
       ),
     );
   }
