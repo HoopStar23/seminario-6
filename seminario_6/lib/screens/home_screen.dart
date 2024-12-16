@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:seminario_6/models/product.dart';
 import 'package:seminario_6/screens/product_screen.dart';
 import 'package:seminario_6/screens/screens.dart';
+import 'package:seminario_6/service/auth_service.dart';
 import 'package:seminario_6/service/product_service.dart';
 import 'package:seminario_6/widgets/widgets.dart';
 
@@ -12,13 +13,20 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final productService = Provider.of<ProductService>(context);
+    final authService = Provider.of<AuthService>(context, listen: false);
 
     if (productService.isLoading) return LoadingScreen();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Productos'),
-      ),
+      appBar: AppBar(title: Text('Productos'), actions: [
+        IconButton(
+          onPressed: () {
+            authService.logout();
+            Navigator.pushReplacementNamed(context, 'login');
+          },
+          icon: const Icon(Icons.login_outlined, color: Colors.white,),
+        ),
+      ]),
       body: Container(
         child: ListView.builder(
           itemCount: productService.products.length,

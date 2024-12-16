@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:seminario_6/providers/login_form_provider.dart';
 import 'package:seminario_6/screens/home_screen.dart';
 import 'package:seminario_6/service/auth_service.dart';
+import 'package:seminario_6/service/notification_service.dart';
 import 'package:seminario_6/ui/input_decorations.dart';
 
 class LoginForm extends StatelessWidget {
@@ -84,7 +85,7 @@ class LoginForm extends StatelessWidget {
                             Navigator.pushReplacementNamed(
                                 context, HomeScreen.routeName);
                           } else {
-                            print(errorMessage);
+                            NotificationService.showSnackBar(errorMessage);
                             loginForm.isLoading = false;
                           }
                         })
