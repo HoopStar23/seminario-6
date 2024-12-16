@@ -78,7 +78,7 @@ class LoginForm extends StatelessWidget {
                           loginForm.isLoading = true;
 
                           final String? errorMessage = await authService
-                              .createUser(loginForm.email, loginForm.password);
+                              .SignUser(loginForm.email, loginForm.password);
 
                           if (errorMessage == null) {
                             Navigator.pushReplacementNamed(
