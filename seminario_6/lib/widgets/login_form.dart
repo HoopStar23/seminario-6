@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:seminario_6/providers/login_form_provider.dart';
 import 'package:seminario_6/screens/home_screen.dart';
+import 'package:seminario_6/service/auth_service.dart';
 import 'package:seminario_6/ui/input_decorations.dart';
 
 class LoginForm extends StatelessWidget {
@@ -62,24 +63,30 @@ class LoginForm extends StatelessWidget {
                   color: Colors.deepPurple,
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 80, vertical: 15),
-                    child:
-                        Text(loginForm.isLoading ? 'Espere' : 'Acceder', style: TextStyle(color: Colors.white)),
+                    child: Text(loginForm.isLoading ? 'Espere' : 'Acceder',
+                        style: TextStyle(color: Colors.white)),
                   ),
                   onPressed: loginForm.isLoading
                       ? null
                       : () async {
                           FocusScope.of(context).unfocus();
+                          final authService =
+                              Provider.of<AuthService>(context, listen: false);
 
                           if (!loginForm.isValidForm()) return;
 
                           loginForm.isLoading = true;
 
-                          await Future.delayed(Duration(seconds: 2));
+                          final String? errorMessage = await authService
+                              .createUser(loginForm.email, loginForm.password);
 
-                          loginForm.isLoading = false;
-
-                          Navigator.pushReplacementNamed(
-                              context, HomeScreen.routeName);
+                          if (errorMessage == null) {
+                            Navigator.pushReplacementNamed(
+                                context, HomeScreen.routeName);
+                          } else {
+                            print(errorMessage);
+                            loginForm.isLoading = false;
+                          }
                         })
             ],
           )),

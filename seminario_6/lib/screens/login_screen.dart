@@ -26,25 +26,25 @@ class LoginScreen extends StatelessWidget {
                       Text('Login',
                           style: Theme.of(context).textTheme.headlineMedium),
                       LoginForm(),
-                      
                     ],
                   )),
             ),
             SizedBox(height: 30),
-            MaterialButton(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+            TextButton(
+              onPressed: () => Navigator.pushReplacementNamed(
+                  context, RegisterScreen.routeName),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.indigo.withOpacity(0.2),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  disabledColor: Colors.grey,
-                  elevation: 0,
-                  color: Colors.white,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 80, vertical: 15),
-                    child:
-                        Text('Crear una nueva cuenta', style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                  onPressed: () => Navigator.pushReplacementNamed(context, RegisterScreen.routeName)
-                  )
+              ),
+              child: const Text(
+                'Crear una nueva cuenta',
+                style: TextStyle(
+                    fontSize: 18, color: Colors.black87),
+              ),
+            ),
           ],
         ),
       )),

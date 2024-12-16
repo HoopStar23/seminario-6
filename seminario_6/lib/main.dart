@@ -5,6 +5,7 @@ import 'package:seminario_6/screens/home_screen.dart';
 import 'package:seminario_6/screens/login_screen.dart';
 import 'package:seminario_6/screens/product_screen.dart';
 import 'package:seminario_6/screens/register_screen.dart';
+import 'package:seminario_6/service/auth_service.dart';
 import 'package:seminario_6/service/product_service.dart';
 
 void main() => runApp(const MyApp());
@@ -15,7 +16,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => ProductService())],
+      providers: [ChangeNotifierProvider(create: (_) => ProductService()),
+                  ChangeNotifierProvider(create: (_) => AuthService())],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Productos App',
@@ -29,7 +31,7 @@ class MyApp extends StatelessWidget {
             elevation: 0
           )
         ),    
-        initialRoute: HomeScreen.routeName,
+        initialRoute: LoginScreen.routeName,
         routes: {HomeScreen.routeName: (BuildContext context) => HomeScreen(),
         LoginScreen.routeName: (BuildContext context) => LoginScreen(),
         RegisterScreen.routeName: (BuildContext context) => RegisterScreen(),
