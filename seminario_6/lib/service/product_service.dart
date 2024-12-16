@@ -113,4 +113,16 @@ class ProductService extends ChangeNotifier {
     final decodedData = json.decode(resp.body);
     return decodedData['secure_url'];
   }
+
+  Future<String> deleteProduct(Product productToDelete) async {
+    final url = Uri.https(_baseUrl, 'products/${productToDelete.id}.json');
+    final resp = await http.delete(url);
+    final decodedData = resp.body;
+
+    final indexToDelete = products.indexWhere((productSearched) => productSearched.id == productToDelete.id);
+    products.removeAt(indexToDelete);
+    notifyListeners();
+
+    return 'Respuesta: $decodedData';
+  } 
 }

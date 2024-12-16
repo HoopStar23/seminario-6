@@ -40,7 +40,7 @@ class _notAvailable extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: Colors.yellow,
+          color: const Color.fromARGB(255, 112, 104, 35),
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(25), bottomRight: Radius.circular(25))),
       width: 100,
